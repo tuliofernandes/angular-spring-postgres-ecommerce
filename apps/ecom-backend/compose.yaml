@@ -8,4 +8,5 @@ services:
       - 'POSTGRES_DB=codecake'
       - 'POSTGRES_PASSWORD=codecake'
     volumes:
-      - '~/volumes/codecake-yt/postgres:/var/lib/postgresql/data'
+      - '../../../codecake-yt/postgres:/var/lib/postgresql/data'
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
