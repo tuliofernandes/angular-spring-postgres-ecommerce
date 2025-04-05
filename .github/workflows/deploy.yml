@@ -32,15 +32,15 @@ jobs:
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh/
-          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
           # Test SSH connection with verbose output
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -vvv ubuntu@${{ secrets.EC2_HOST }} echo "SSH test"
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -vvv ubuntu@${{ secrets.EC2_HOST }} echo "SSH test"
 
       - name: Deploy to EC2
         run: |
-          ssh -i ~/.ssh/id_ed25519 ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
             cd /home/ubuntu/
             rm -rf angular-spring-postgres-ecommerce
             git clone https://github.com/tuliofernandes/angular-spring-postgres-ecommerce.git
