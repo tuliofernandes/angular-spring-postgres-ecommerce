@@ -32,13 +32,9 @@ jobs:
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh/
-          # Save key with debug output
           echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/key
           chmod 600 ~/.ssh/key
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-          # Show key fingerprint (safe to display)
-          ssh-keygen -l -f ~/.ssh/key
-          # Test connection
           ssh -i ~/.ssh/key -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} echo "SSH test"
 
       - name: Deploy to EC2
