@@ -35,6 +35,9 @@ jobs:
           echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          # DEBUG (TODO: Remove this)
+          ls -la ~/.ssh/
+          ssh -v ubuntu@${{ secrets.EC2_HOST }} echo "SSH connection test"
 
       - name: Deploy to EC2
         run: |
