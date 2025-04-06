@@ -32,10 +32,21 @@ jobs:
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh/
+          # Debug: Show the start of the private key (first line only)
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" | head -n 1
+          # Save the key
           echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/key
           chmod 600 ~/.ssh/key
+          # Show key permissions
+          ls -la ~/.ssh/key
+          # Show key fingerprint
+          ssh-keygen -l -f ~/.ssh/key
+          # Show public key from private key
+          ssh-keygen -y -f ~/.ssh/key
+          # Add host key
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/key -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} echo "SSH test"
+          # Test with maximum verbosity
+          ssh -vvv -i ~/.ssh/key ubuntu@${{ secrets.EC2_HOST }} echo "SSH test"
 
       - name: Deploy to EC2
         run: |
