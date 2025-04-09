@@ -11,9 +11,8 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
-import java.lang.reflect.ParameterizedType;
-import java.net.URI;
-import java.net.URL;
+import jakarta.annotation.PostConstruct;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -24,6 +23,7 @@ import java.util.Optional;
 public class KindeService {
 
   private static final Logger log = LoggerFactory.getLogger(KindeService.class);
+
   @Value("${application.kinde.api}")
   private String apiUrl;
 
@@ -36,15 +36,20 @@ public class KindeService {
   @Value("${application.kinde.audience}")
   private String audience;
 
-  private final RestClient restClient = RestClient.builder()
-    .requestFactory(new HttpComponentsClientHttpRequestFactory())
-    .baseUrl(apiUrl)
-    .build();
+  private RestClient restClient;
+
+  @PostConstruct
+  public void init() {
+    this.restClient = RestClient.builder()
+      .requestFactory(new HttpComponentsClientHttpRequestFactory())
+      .baseUrl(apiUrl)
+      .build();
+  }
 
   private Optional<String> getToken() {
     try {
       ResponseEntity<KindeAccessToken> accessToken = restClient.post()
-        .uri(apiUrl + "/oauth/token")
+        .uri("/oauth/token")
         .body("grant_type=client_credentials&audience=" + URLEncoder.encode(audience, StandardCharsets.UTF_8))
         .accept(MediaType.APPLICATION_JSON)
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -53,7 +58,8 @@ public class KindeService {
         .header("Content-Type", ContentType.APPLICATION_FORM_URLENCODED.getMimeType())
         .retrieve()
         .toEntity(KindeAccessToken.class);
-      return Optional.of(accessToken.getBody().accessToken());
+
+      return Optional.ofNullable(accessToken.getBody().accessToken());
     } catch (Exception e) {
       log.error("Error while getting token", e);
       return Optional.empty();
@@ -66,7 +72,7 @@ public class KindeService {
     var typeRef = new ParameterizedTypeReference<Map<String, Object>>() {};
 
     ResponseEntity<Map<String, Object>> authorization = restClient.get()
-      .uri(apiUrl + "/api/v1/user?id={id}", userId)
+      .uri("/api/v1/user?id={id}", userId)
       .header("Authorization", "Bearer " + token)
       .accept(MediaType.APPLICATION_JSON)
       .retrieve()
@@ -74,5 +80,4 @@ public class KindeService {
 
     return authorization.getBody();
   }
-
 }
