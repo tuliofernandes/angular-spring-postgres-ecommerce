@@ -40,6 +40,13 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -i ~/.ssh/key ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            # Setup environment variables
+            export DB_URL=${{ secrets.DB_URL }}
+            export DB_NAME=${{ secrets.DB_NAME }}
+            export DB_USERNAME=${{ secrets.DB_USERNAME }}
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            export STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+
             # Install Docker and Docker Compose if not installed
             if ! command -v docker &> /dev/null; then
               echo "Installing Docker on EC2 instance..."
@@ -59,11 +66,26 @@ jobs:
               sudo usermod -aG docker ubuntu
               newgrp docker
             fi
-      
+
+            # Clone and setup the project
             cd /home/ubuntu/
             rm -rf angular-spring-postgres-ecommerce
             git clone https://github.com/tuliofernandes/angular-spring-postgres-ecommerce.git
-            cd angular-spring-postgres-ecommerce/backend
-            docker compose down
-            docker compose up -d --build
+            cd angular-spring-postgres-ecommerce
+            npm install
+
+            # Build the backend
+            npx nx build ecom-backend
+
+            # Build the frontend
+            npx nx build ecom-frontend
+            
+            # Run backend
+            nohup java -jar dist/apps/ecom-backend/ecom-0.0.1-SNAPSHOT.jar > backend.log 2>&1 &
+            
+            # Run frontend
+            nohup node dist/apps/ecom-frontend/server/server.mjs > frontend.log 2>&1 &
+
+            # Build and run the database container
+            docker compose -f apps/ecom-backend/compose.yaml up -d --build
           EOF
