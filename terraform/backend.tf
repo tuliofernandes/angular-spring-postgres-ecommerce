@@ -43,7 +43,7 @@ resource "aws_security_group" "backend_sg" {
 # Key pair for the EC2 instance
 resource "aws_key_pair" "backend_key_pair" {
   key_name = "backend-key"
-  public_key = file("~/.ssh/id_ed25519.pub")
+  public_key = file("~/.ssh/ec2/ec2-ssh-key.pub")
 }
 
 # EC2 Instance for the backend
