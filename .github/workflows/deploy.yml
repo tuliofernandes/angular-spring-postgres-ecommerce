@@ -69,7 +69,7 @@ jobs:
 
             if ! command -v node &> /dev/null; then
               sudo apt-get update
-              sudo apt install -y nodejs
+              sudo apt install -y nodejs npm
             fi
 
             # Clone and setup the project
