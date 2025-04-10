@@ -67,6 +67,11 @@ jobs:
               newgrp docker
             fi
 
+            if ! command -v node &> /dev/null; then
+              sudo apt-get update
+              sudo apt install -y node
+            fi
+
             # Clone and setup the project
             cd /home/ubuntu/
             rm -rf angular-spring-postgres-ecommerce
